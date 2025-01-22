@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users Management</title>
+    <script>
+        const baseUrl = "http://localhost:8080/api/users"
+
+        async function getAllUsers() {
+            const response = await fetch(baseUrl);
+            const users = await response.json();
+            document.getElementById("usersList").innerHTML = users.map((user, index) => `<li>${index + 1}. ${user}</li>`).join("");
+        }
+
+        async function registerUser() {
+            const userName = document.getElementById("userName").value;
+            const response = await fetch(baseUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(userName)
+            });
+            alert(await response.text());
+            getAllUsers();
+        }
+
+        async function loginUser() {
+            const userName = document.getElementById("loginUserName").value;
+            const password = document.getElementById("loginPassword").value; // Заглушка
+            const response = await fetch(`${baseUrl}/login?userName=${userName}&password=${password}`, {
+                method: "POST"
+            });
+            alert(await response.text());
+        }
+
+        async function deleteUser() {
+            const index = document.getElementById("deleteUserIndex").value - 1; // Індекс починається з 0
+            const response = await fetch(`${baseUrl}/${index}`, { method: "DELETE" });
+            alert(await response.text());
+            getAllUsers();
+        }
+
+        document.addEventListener("DOMContentLoaded", getAllUsers);
+    </script>
+</head>
+<body>
+    <h1>Users Management</h1>
+    <ul id="usersList"></ul>
+
+    <h2>Register User</h2>
+    <input type="text" id="userName" placeholder="Enter user name">
+    <button onclick="registerUser()">Register</button>
+
+    <h2>Login User</h2>
+    <input type="text" id="loginUserName" placeholder="Enter user name">
+    <input type="password" id="loginPassword" placeholder="Enter password">
+    <button onclick="loginUser()">Login</button>
+
+    <h2>Delete User</h2>
+    <input type="number" id="deleteUserIndex" placeholder="Enter user index">
+    <button onclick="deleteUser()">Delete</button>
+</body>
+</html>

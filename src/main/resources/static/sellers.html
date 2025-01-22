@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sellers Management</title>
+    <script>
+        const baseUrl = "http://localhost:8080/api/sellers";
+        async function getAllSellers() {
+            const response = await fetch(baseUrl);
+            const sellers = await response.json();
+            document.getElementById("sellersList").innerHTML = sellers.map((seller, index) => `<li>${index + 1}. ${seller}</li>`).join("");
+        }
+
+        async function registerSeller() {
+            const sellerName = document.getElementById("sellerName").value;
+            const response = await fetch(baseUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(sellerName)
+            });
+            alert(await response.text());
+            getAllSellers();
+        }
+
+        async function updateSeller() {
+            const index = document.getElementById("sellerIndex").value - 1; // Індекс починається з 0
+            const updatedName = document.getElementById("updatedSellerName").value;
+            const response = await fetch(`${baseUrl}/${index}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedName)
+            });
+            alert(await response.text());
+            getAllSellers();
+        }
+
+        async function deleteSeller() {
+            const index = document.getElementById("deleteSellerIndex").value - 1;
+            const response = await fetch(`${baseUrl}/${index}`, { method: "DELETE" });
+            alert(await response.text());
+            getAllSellers();
+        }
+
+        document.addEventListener("DOMContentLoaded", getAllSellers);
+    </script>
+</head>
+<body>
+    <h1>Sellers Management</h1>
+    <ul id="sellersList"></ul>
+
+    <h2>Register Seller</h2>
+    <input type="text" id="sellerName" placeholder="Enter seller name">
+    <button onclick="registerSeller()">Register</button>
+
+    <h2>Update Seller</h2>
+    <input type="number" id="sellerIndex" placeholder="Enter seller index">
+    <input type="text" id="updatedSellerName" placeholder="Enter updated seller name">
+    <button onclick="updateSeller()">Update</button>
+
+    <h2>Delete Seller</h2>
+    <input type="number" id="deleteSellerIndex" placeholder="Enter seller index">
+    <button onclick="deleteSeller()">Delete</button>
+    </body>
+</html>

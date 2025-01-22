@@ -1,4 +1,4 @@
-package com.Baranov.demo;
+package com.Baranov.demo.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.Baranov.demo.model.Product;
+import com.Baranov.demo.models.Product;
 
 
 @RestController

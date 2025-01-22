@@ -25,21 +25,35 @@
     </style>
 </head>
 <body>
-<h1>Product List</h1>
-<button id="loadProducts">Load Products</button>
-<table id="productTable" style="display:none;">
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Category</th>
-        <th>Description</th>
-        <th>Price</th>
-        <th>Stock</th>
-    </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+    <h1>Product List</h1>
+    <button id="loadProducts">Load Products</button>
+    <table id="productTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h1>Product List</h1>
+    <button id="loadListSellers">Load Products</button>
+    <table id="sellersListTable" style="display:none;">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Rating</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
 <script>
     document.getElementById('loadProducts').addEventListener('click', function () {
@@ -66,6 +80,29 @@
                 table.style.display = 'table';
             })
             .catch(error => console.error('Error loading products:', error));
+    });
+    document.getElementById('loadListSellers').addEventListener('click', function () {
+        fetch('/api/sellers/list')
+            .then(response => response.json())
+            .then(data => {
+                const table = document.getElementById('sellersListTable');
+                const tbody = table.querySelector('tbody');
+                tbody.innerHTML = '';
+
+                data.forEach(seller => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                            <td>${seller.id}</td>
+                            <td>${seller.name}</td>
+                            <td>${seller.age}</td>
+                            <td>${seller.rating}</td>
+                        `;
+                    tbody.appendChild(row);
+                });
+
+                table.style.display = 'table';
+            })
+            .catch(error => console.error('Error loading sellers:', error));
     });
 </script>
 </body>
