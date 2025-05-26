@@ -1,63 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Users Management</title>
     <script>
-        const baseUrl = "http://localhost:8080/api/users"
+        const baseUrl = "http://localhost:8080/api/users";
 
         async function getAllUsers() {
-            const response = await fetch(baseUrl);
-            const users = await response.json();
-            document.getElementById("usersList").innerHTML = users.map((user, index) => `<li>${index + 1}. ${user}</li>`).join("");
+            try {
+                const response = await fetch(baseUrl);
+                if (!response.ok) throw new Error('Не вдалося завантажити користувачів');
+                const users = await response.json();
+                document.getElementById("usersList").innerHTML = users
+                    .map((user, index) => `<li>${index + 1}. ${user.email}</li>`)
+                    .join("");
+            } catch (e) {
+                alert(e.message);
+            }
         }
 
         async function registerUser() {
-            const userName = document.getElementById("userName").value;
-            const response = await fetch(baseUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(userName)
-            });
-            alert(await response.text());
-            getAllUsers();
+            const email = document.getElementById("userEmail").value.trim();
+            const password = document.getElementById("userPassword").value.trim();
+
+            if (!email || !password) {
+                alert("Будь ласка, введіть email та пароль.");
+                return;
+            }
+
+            try {
+                const response = await fetch(baseUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Помилка реєстрації');
+                }
+                alert("Користувача успішно зареєстровано");
+                document.getElementById("userEmail").value = "";
+                document.getElementById("userPassword").value = "";
+                getAllUsers();
+            } catch (e) {
+                alert(`Помилка реєстрації: ${e.message}`);
+            }
         }
 
         async function loginUser() {
-            const userName = document.getElementById("loginUserName").value;
-            const password = document.getElementById("loginPassword").value; // Заглушка
-            const response = await fetch(`${baseUrl}/login?userName=${userName}&password=${password}`, {
-                method: "POST"
-            });
-            alert(await response.text());
+            const email = document.getElementById("loginEmail").value.trim();
+            const password = document.getElementById("loginPassword").value.trim();
+
+            if (!email || !password) {
+                alert("Будь ласка, введіть email та пароль для входу.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseUrl}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Помилка входу');
+                }
+
+                const result = await response.text();
+                alert("Вхід успішний: " + result);
+            } catch (e) {
+                alert(`Помилка входу: ${e.message}`);
+            }
         }
 
         async function deleteUser() {
-            const index = document.getElementById("deleteUserIndex").value - 1; // Індекс починається з 0
-            const response = await fetch(`${baseUrl}/${index}`, { method: "DELETE" });
-            alert(await response.text());
-            getAllUsers();
+            const indexStr = document.getElementById("deleteUserIndex").value.trim();
+            const index = parseInt(indexStr, 10) - 1;
+
+            if (isNaN(index) || index < 0) {
+                alert("Введіть коректний індекс користувача.");
+                return;
+            }
+
+            try {
+                const response = await fetch(baseUrl);
+                if (!response.ok) throw new Error('Не вдалося завантажити користувачів');
+                const users = await response.json();
+
+                if (index >= users.length) {
+                    alert("Індекс виходить за межі списку користувачів.");
+                    return;
+                }
+
+                const userId = users[index].id;
+                if (!userId) {
+                    alert("Не вдалося знайти ID користувача для видалення.");
+                    return;
+                }
+
+                // Видаляємо користувача за ID
+                const deleteResponse = await fetch(`${baseUrl}/${userId}`, { method: "DELETE" });
+                if (!deleteResponse.ok) {
+                    const errorText = await deleteResponse.text();
+                    throw new Error(errorText || "Помилка видалення користувача");
+                }
+
+                alert("Користувача успішно видалено");
+                document.getElementById("deleteUserIndex").value = "";
+                getAllUsers();
+            } catch (e) {
+                alert(`Помилка видалення: ${e.message}`);
+            }
         }
 
         document.addEventListener("DOMContentLoaded", getAllUsers);
     </script>
 </head>
 <body>
-    <h1>Users Management</h1>
-    <ul id="usersList"></ul>
+<h1>Users Management</h1>
+<ul id="usersList"></ul>
 
-    <h2>Register User</h2>
-    <input type="text" id="userName" placeholder="Enter user name">
-    <button onclick="registerUser()">Register</button>
+<h2>Register User</h2>
+<input type="email" id="userEmail" placeholder="Enter email" required />
+<input type="password" id="userPassword" placeholder="Enter password" required />
+<button onclick="registerUser()">Register</button>
 
-    <h2>Login User</h2>
-    <input type="text" id="loginUserName" placeholder="Enter user name">
-    <input type="password" id="loginPassword" placeholder="Enter password">
-    <button onclick="loginUser()">Login</button>
+<h2>Login User</h2>
+<input type="email" id="loginEmail" placeholder="Enter email" required />
+<input type="password" id="loginPassword" placeholder="Enter password" required />
+<button onclick="loginUser()">Login</button>
 
-    <h2>Delete User</h2>
-    <input type="number" id="deleteUserIndex" placeholder="Enter user index">
-    <button onclick="deleteUser()">Delete</button>
+<h2>Delete User</h2>
+<input type="number" id="deleteUserIndex" placeholder="Enter user index" min="1" />
+<button onclick="deleteUser()">Delete</button>
 </body>
 </html>

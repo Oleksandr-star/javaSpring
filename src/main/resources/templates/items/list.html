@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<section>
+    <div th:each="item : ${items}" class="item-card">
+        <h2 th:text="${item.title}"></h2>
+        <p th:text="${item.description}"></p>
+        <sec:authorize access="hasRole('ADMIN')">
+            <form th:action="@{/items/delete/{id}(id=${item.id})}" method="post" style="display:inline;">
+                <input type="hidden" name="_method" value="delete"/>
+                <button type="submit">Видалити</button>
+            </form>
+        </sec:authorize>
+    </div>
+</section>
+</body>
+</html>
